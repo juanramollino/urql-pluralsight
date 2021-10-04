@@ -46,8 +46,8 @@ export async function AddTeam(name, desciption = "") {
         })
         .catch(error => {
             // I don't think this works.
-            console.log("Error occured when trying to add a team");
-            console.log(error)
+            console.error("Error occured when trying to add a team");
+            console.error(error)
         })
 
     return(teamInfo);
@@ -93,8 +93,8 @@ export async function AddTeamManager(userId, teamId) {
         })
         .catch(error => {
             // I don't think this works.
-            console.log("Error occured when trying to add a member to a team");
-            console.log(error)
+            console.error("Error occured when trying to add a member to a team");
+            console.error(error)
         })
 }
 
@@ -136,8 +136,8 @@ export async function AddTeamMember(userId, teamId) {
         })
         .catch(error => {
             // I don't think this works.
-            console.log("Error occured when trying to add a member to a team");
-            console.log(error)
+            console.error("Error occured when trying to add a member to a team");
+            console.error(error)
         })
 
 }
@@ -184,7 +184,12 @@ export async function AddTeamMember(userId, teamId) {
                     break;
             }
            
-        });
+        })
+        .catch(error => {
+            // I don't think this works.
+            console.error("Error occured when trying to ovbtain team information.");
+            console.error(error)
+        })
 
     // Return
     return teamInfo;
@@ -233,8 +238,8 @@ export async function InviteManager(managerEmail, teamId) {
         })
         .catch(error => {
             // I don't think this works.
-            console.log("Error occured when trying to add a member to a team");
-            console.log(error)
+            console.error("Error occured when trying to add a member to a team");
+            console.error(error)
         })
 
 }
