@@ -1,6 +1,7 @@
 import { initClient } from "../graphql.js"
 import * as queries from "../queries.js";
 import * as mutations from "../mutations.js";
+import { TeamInfo } from "./TeamInfo";
 
 /**
  * Adds a new Team to Pluralsight by name
@@ -8,11 +9,11 @@ import * as mutations from "../mutations.js";
  * @param {string} [desciption=""] Desciption of the new Team (unused)
  * @returns a JSON element with the team information
  */
-export async function AddTeam(name, desciption = "") {
+export async function createTeam(name : string, desciption : string = "") : Promise<TeamInfo> {
     var client = initClient();
     const mutation = mutations.ADD_TEAM;
     const variables = { "myTeamInput" : { "name" : name }};
-    var teamInfo;
+    var teamInfo : TeamInfo = { id : "", name : "" };
 
     // DEBUG
     // console.log("Adding team");
@@ -32,9 +33,10 @@ export async function AddTeam(name, desciption = "") {
             if (result.error) {
                 // Most likely, the team already exists.
                 // TODO: Improve all of this logic.
-                console.log(result.error);
-                teamInfo = null;
+                console.error(result.error);
+
             } else {
+                console.log(result.data.addTeam);
                 teamInfo = {
                     "id" : result.data.addTeam.id ,
                     "name" : result.data.addTeam.name
@@ -58,7 +60,7 @@ export async function AddTeam(name, desciption = "") {
  * @param {string} userId String representing the User Id of the Manager (should exist)
  * @param {string} teamId String representing the Team Id
  */
-export async function AddTeamManager(userId, teamId) {
+export async function AddTeamManager(userId : string, teamId : string) {
     var client = initClient();
     const mutation = mutations.ADD_TEAM_MANAGER;
     const variables = { "myTeamManagerInput" : { "teamId" : teamId, "userId" : userId, "permissionLevel" : "LIMITED" } };
@@ -103,7 +105,7 @@ export async function AddTeamManager(userId, teamId) {
  * @param {string} userId String representing the Pluralsight User Id
  * @param {string} teamId String representing the Pluralsight Team Id
  */
-export async function AddTeamMember(userId, teamId) {
+export async function addTeamMember(userId : string, teamId : string) {
     var client = initClient();
     const mutation = mutations.ADD_TEAM_MEMBER;
     const variables = { "myTeamMemberInput" : { "teamId" : teamId , "userId" : userId } };
@@ -142,24 +144,25 @@ export async function AddTeamMember(userId, teamId) {
 
 }
 
+
 /**
  * Obtains Team informataion based on the team name supplied as parameter.
  * @param {string} teamName Team Name
  * @returns a JSON object with the Team information
  */
- export async function GetTeamInfo(teamName) {
+ export async function getTeamInfo(teamName : string) : Promise<TeamInfo | undefined> {
     var client = initClient();
     const query = queries.GET_TEAMS_BY_NAME;
     const variables = { "myTeamsFilter" : { "name" : teamName } };
 
-    var teamInfo;
+    var teamInfo : TeamInfo = { id : "", name : "" };
 
     // Execute GraphQL query and analyze results.
     await client
         .query(query, variables)
         .toPromise()
         .then(result => {
-            var nodes = result.data.teams.nodes;
+            var nodes : TeamInfo[] = result.data.teams.nodes;
             
             // DEBUG to check result count.
             console.log(`Obtained ${nodes.length} Teams`);
@@ -180,7 +183,7 @@ export async function AddTeamMember(userId, teamId) {
 
                     break;
                 default:
-                    teamInfo = null;
+
                     break;
             }
            
@@ -191,7 +194,12 @@ export async function AddTeamMember(userId, teamId) {
 }
 
 
-export async function InviteManager(managerEmail, teamId) {
+/**
+ * 
+ * @param managerEmail 
+ * @param teamId 
+ */
+export async function InviteManager(managerEmail : string, teamId : string) {
     var client = initClient();
     const mutation = mutations.INVITE_MANAGER;
     const variables = {

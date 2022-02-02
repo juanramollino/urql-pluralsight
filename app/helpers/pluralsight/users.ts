@@ -1,17 +1,22 @@
 import { initClient } from "../graphql.js";
 import * as queries from "../queries.js"
 
+type UserInfo = {
+    id: string,
+    name: string
+};
+
 /**
  * Returns user information.
  * @param {string} email e-mail address of the user
  * @returns a JSON object with the user information. Or null if the user cannot be found.
  */
- export async function getUserByEmail(email) {
+ export async function getUserByEmail(email : string) : Promise<UserInfo>{
     var client = initClient();
     const query = queries.GET_USER_BY_EMAIL_QUERY;
     const variables = { "myUserFilter" : { "emails" : email } };
     
-    var queryResult;
+    var queryResult : UserInfo = { id: "", name: ""};
 
     // Executes the GraphQL query against the server to get the matching user.
     await client
@@ -33,6 +38,5 @@ import * as queries from "../queries.js"
             console.log(error);
         });
 
-    // console.log("Bye");
     return(queryResult);
 }
