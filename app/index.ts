@@ -1,6 +1,6 @@
-import { addUserToTeam, addManagerToTeam } from "./helpers/graphql.js" 
-import fetch from "node-fetch" // Asco
+// import fetch from "node-fetch" // Asco
 import { lchmod, readFileSync} from "fs"
+import { addUserToTeam, addManagerToTeam } from "./helpers/graphql";
 
 //globalThis.fetch = fetch
 

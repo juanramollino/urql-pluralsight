@@ -1,6 +1,6 @@
-import { initClient } from "../graphql.js"
-import * as queries from "../queries.js";
-import * as mutations from "../mutations.js";
+import { initClient } from "../graphql"
+import * as queries from "../queries";
+import * as mutations from "../mutations";
 import { TeamInfo } from "./TeamInfo";
 
 /**

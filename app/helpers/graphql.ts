@@ -6,8 +6,8 @@ import {
   getTeamInfo,
   InviteManager,
 } from "./pluralsight/teams";
-import { getUserByEmail } from "./pluralsight/users.js";
-import * as queries from "./queries.js";
+import { getUserByEmail } from "./pluralsight/users";
+import * as queries from "./queries";
 // import * as mutations from "./mutations.js";
 
 /**
