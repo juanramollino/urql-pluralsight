@@ -16,7 +16,7 @@ export async function createTeam(name : string, desciption : string = "") : Prom
     var teamInfo : TeamInfo = { id : "", name : "" };
 
     // DEBUG
-    // console.log("Adding team");
+    console.log(`[Create Team] Adding team ${name}`);
     // console.log(variables);
 
     // Execute GraphQL mutation to add the team
@@ -157,6 +157,8 @@ export async function addTeamMember(userId : string, teamId : string) {
 
     var teamInfo : TeamInfo = { id : "", name : "" };
 
+    console.log(`[GetTeamInfo] Searching for team ${teamName}`);
+
     // Execute GraphQL query and analyze results.
     await client
         .query(query, variables)
@@ -165,7 +167,7 @@ export async function addTeamMember(userId : string, teamId : string) {
             var nodes : TeamInfo[] = result.data.teams.nodes;
             
             // DEBUG to check result count.
-            console.log(`Obtained ${nodes.length} Teams`);
+            console.log(`[Get team info] Obtained ${nodes.length} Teams`);
 
             // Need to further filter by Team Name because the API uses patterns to filter by name.
             var finalists = nodes.filter(team => team.name == teamName);
@@ -173,24 +175,30 @@ export async function addTeamMember(userId : string, teamId : string) {
             switch (true) {
                 case finalists.length > 1:
                     // This should never happen.
-                    throw "[GetTeamInfo] Got two or more teams and couldn't parse them.";
+                    throw "[Get team info] Got two or more teams and couldn't parse them.";
                     break;
                 case finalists.length == 1:
+                    // If an exact match is found, return that team info. 
+                    console.log('[Get team info] Team found')
                     teamInfo = finalists[0];
-
-                    // DEBUG
-                    // console.log(teamInfo);
+                    console.log(teamInfo);
+                    return(teamInfo);
 
                     break;
                 default:
-
+                    return undefined;
                     break;
             }
            
+        })
+        .catch(error => {
+            console.log(error);
+            return(undefined);
         });
 
-    // Return
-    return teamInfo;
+    // Return undefined if no team is found
+    console.log("IMOUTAHERE");
+    return undefined;
 }
 
 

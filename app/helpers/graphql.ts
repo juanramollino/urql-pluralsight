@@ -8,6 +8,8 @@ import {
 } from "./pluralsight/teams";
 import { getUserByEmail } from "./pluralsight/users";
 import * as queries from "./queries";
+import fetch from "isomorphic-unfetch";
+import { type } from "os";
 // import * as mutations from "./mutations.js";
 
 /**
@@ -20,6 +22,7 @@ export function initClient(): Client {
 
   var client = createClient({
     url: `${endpoint}`,
+    fetch: fetch,
     fetchOptions: () => {
       const token = APIKey;
       return {
@@ -62,6 +65,8 @@ export const teamExists = async (teamName: string) => {
       var nodes = result.data.teams.nodes;
       teamExists = nodes.length == 1;
 
+      console.log(`[TeamExists] ${teamName} -> ${teamExists} ]`)
+
       console.log(nodes);
     });
 
@@ -88,7 +93,8 @@ export const addUserToTeam = async (
   Promise.all([getUserByEmail(email), getTeamInfo(teamName)]).then(
     ([pluralsightUser, pluralsightTeam]) => {
       // DEBUG
-      console.log(`- Adding user ${email} to team "${teamName}"`);
+      console.log(`[Add user to team] Adding user ${email} to team "${teamName}"`);
+      console.log(`[Add user to Team] Team name : ${pluralsightTeam?.name}`);
 
       return (
         !pluralsightTeam
@@ -97,8 +103,8 @@ export const addUserToTeam = async (
       )
         .then(log("lorem"))
         .then((pluralsightTeam) => {
-          console.log("- User ID from PS: ", pluralsightUser.id);
-          console.log("- Team ID from PS: ", pluralsightTeam.id);
+          log(`[Add user to team] User ID from PS: ${pluralsightUser.id}`);
+          log(`[Add user to team] Team ID from PS: ${pluralsightTeam.id}`);
 
           return addTeamMember(pluralsightUser.id, pluralsightTeam.id);
         });

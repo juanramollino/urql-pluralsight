@@ -36,6 +36,7 @@ async function teamSync() {
         }
     });
 
+    /*
     // For each Team, make sure the correct Manager is set up.
     teamInfo.forEach(async (team) => {
         // Debug
@@ -45,6 +46,7 @@ async function teamSync() {
         addManagerToTeam(team.manager, team.name, true);
 
     });
+    */
 
 }
 

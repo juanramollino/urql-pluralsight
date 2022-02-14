@@ -15,8 +15,6 @@ type UserInfo = {
     var client = initClient();
     const query = queries.GET_USER_BY_EMAIL_QUERY;
     const variables = { "myUserFilter" : { "emails" : email } };
-
-    console.log(variables);
     
     var queryResult : UserInfo = { id: "", name: ""};
 
@@ -26,17 +24,15 @@ type UserInfo = {
         .toPromise()
         .then(result => {
             // Debug stuff
-            console.log("[getUserByEmail] ", result);
+            // console.log("[getUserByEmail] ", result);
 
-            //var nodes = result.data.users.nodes;
-            //console.log(nodes);
-            //if (!nodes || nodes.length > 1)
-            //    throw 'Multiple or no nodes returned.';
-
-
+            var nodes = result.data.users.nodes;
+            console.log(nodes);
+            if (!nodes || nodes.length > 1)
+                throw 'Multiple or no nodes returned.';
 
             // Set the return value.
-            //queryResult = result.data.users.nodes[0];
+            queryResult = result.data.users.nodes[0];
         })
         .catch(error => {
             console.log("Something bad has happened when trying to get an user by e-mail.");
