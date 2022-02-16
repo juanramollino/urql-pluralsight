@@ -29,7 +29,7 @@ async function teamSync() {
     )
   );
 
-  // Create all Teams
+  // Create all Teams, if they don't exist.
   justTeams.forEach((teamName: string) => {
     Promise.resolve(teamExists(teamName)).then((exists) => {
       if (!exists) createTeam(teamName);
