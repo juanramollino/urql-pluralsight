@@ -9,8 +9,6 @@ import {
 import { getUserByEmail } from "./pluralsight/users";
 import * as queries from "./queries";
 import fetch from "isomorphic-unfetch";
-import { type } from "os";
-// import * as mutations from "./mutations.js";
 
 /**
  * Initializes the GraphQLClient
@@ -31,8 +29,6 @@ export function initClient(): Client {
     },
   });
 
-  // console.log("Client initialized.");
-
   return client;
 }
 
@@ -46,8 +42,7 @@ export const getUsers = async () => {
     .then((result) => {
       console.log(JSON.stringify(result.data));
     });
-}
-
+};
 
 // Returns a bool indicating if a Team with the name passed as parameter exists
 export const teamExists = async (teamName: string) => {
@@ -58,21 +53,19 @@ export const teamExists = async (teamName: string) => {
   var teamExists = false;
 
   // Execute GraphQL query and analyze results.
-  await client
+  return await client
     .query(query, variables)
     .toPromise()
     .then((result) => {
       var nodes = result.data.teams.nodes;
       teamExists = nodes.length == 1;
 
-      console.log(`[TeamExists] ${teamName} -> ${teamExists} ]`)
+      console.log(`[TeamExists] ${teamName} -> ${teamExists} ]`);
 
-      console.log(nodes);
+      // console.log(nodes);
+      return teamExists;
     });
-
-  // Return
-  return teamExists;
-}
+};
 
 const log =
   (message: string) =>
@@ -86,14 +79,14 @@ const log =
  * @param {string} email e-mail address of the user
  * @param {string} teamName team name to be added
  */
-export const addUserToTeam = async (
-  email: string,
-  teamName: string
-) =>
+export const addUserToTeam = async (email: string, teamName: string) =>
   Promise.all([getUserByEmail(email), getTeamInfo(teamName)]).then(
     ([pluralsightUser, pluralsightTeam]) => {
       // DEBUG
-      console.log(`[Add user to team] Adding user ${email} to team "${teamName}"`);
+      console.log(
+        `[Add user to team] Adding user ${email} to team "${teamName}"`
+      );
+      console.log(`[Add user to Team] User name : ${pluralsightUser.name}`);
       console.log(`[Add user to Team] Team name : ${pluralsightTeam?.name}`);
 
       return (

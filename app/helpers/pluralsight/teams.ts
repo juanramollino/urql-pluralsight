@@ -150,7 +150,7 @@ export async function addTeamMember(userId : string, teamId : string) {
  * @param {string} teamName Team Name
  * @returns a JSON object with the Team information
  */
- export async function getTeamInfo(teamName : string) : Promise<TeamInfo | undefined> {
+export async function getTeamInfo(teamName : string) : Promise<TeamInfo | undefined> {
     var client = initClient();
     const query = queries.GET_TEAMS_BY_NAME;
     const variables = { "myTeamsFilter" : { "name" : teamName } };
@@ -160,7 +160,7 @@ export async function addTeamMember(userId : string, teamId : string) {
     console.log(`[GetTeamInfo] Searching for team ${teamName}`);
 
     // Execute GraphQL query and analyze results.
-    await client
+    return client
         .query(query, variables)
         .toPromise()
         .then(result => {
@@ -197,8 +197,8 @@ export async function addTeamMember(userId : string, teamId : string) {
         });
 
     // Return undefined if no team is found
-    console.log("IMOUTAHERE");
-    return undefined;
+   // console.log("IMOUTAHERE");
+    //return undefined;
 }
 
 
