@@ -57,7 +57,7 @@ export async function addTeamManager(userId: string, teamId: string) {
 export async function createTeam(
   name: string,
   desciption: string = ""
-): Promise<AddTeamPayload> {
+): Promise<AddTeamPayload | undefined> {
   var client: Client = initClient();
   const mutation = mutations.ADD_TEAM;
   const variables = { myTeamInput: { name: name } };
@@ -69,7 +69,7 @@ export async function createTeam(
 
   // Execute GraphQL mutation to add the team
   // Should check for existence? Maybe
-  await client
+  return client
     .mutation(mutation, variables)
     .toPromise()
     .then((result) => {
@@ -80,6 +80,7 @@ export async function createTeam(
         // Most likely, the team already exists.
         // TODO: Improve all of this logic.
         console.error(result.error);
+        return undefined;
       } else {
         console.log(result.data);
         console.log(result.data.addTeam);
@@ -87,15 +88,15 @@ export async function createTeam(
           id: result.data.addTeam.id,
           name: result.data.addTeam.name,
         };
+        return addTeamPayload;
       }
     })
     .catch((error) => {
       // I don't think this works.
       console.log("Error occured when trying to add a team");
       console.log(error);
+      return undefined;
     });
-
-  return addTeamPayload;
 }
 
 /**
@@ -243,7 +244,7 @@ export async function inviteManager(managerEmail: string, teamId: string) {
 }
 
 // Returns a bool indicating if a Team with the name passed as parameter exists
-export const teamExists = async (teamName: string) => {
+export const teamExists = async (teamName: string): Promise<boolean> => {
   var client: Client = initClient();
   const query = queries.GET_TEAMS_BY_NAME;
   const variables = { myTeamsFilter: { name: teamName } };

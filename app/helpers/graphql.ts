@@ -60,21 +60,20 @@ export const addUserToTeam = async (email: string, teamName: string) =>
   Promise.all([getUserByEmail(email), getTeamInfo(teamName)]).then(
     ([pluralsightUser, pluralsightTeam]) => {
       // DEBUG
-      console.log(
-        `[Add user to team] Adding user ${email} to team "${teamName}"`
-      );
-      console.log(`[Add user to Team] User name : ${pluralsightUser.name}`);
-      console.log(`[Add user to Team] Team name : ${pluralsightTeam?.name}`);
+      /*(console.log(
+        `[add-user-to-team] Adding user ${email} to team "${teamName}"`
+      );*/
+      console.log(`[add-user-to-team] User name : ${pluralsightUser.name}`);
+      console.log(`[add-user-to-team] Team name : ${pluralsightTeam?.name}`);
 
-      return (
-        !pluralsightTeam
-          ? createTeam(teamName)
-          : Promise.resolve(pluralsightTeam)
-      )
+      if (!pluralsightTeam)
+        throw "[add-user-to-team] Something went really wrong when checking/creating a team";
+
+      return Promise.resolve(pluralsightTeam)
         .then(log("lorem"))
         .then((pluralsightTeam) => {
-          log(`[Add user to team] User ID from PS: ${pluralsightUser.id}`);
-          log(`[Add user to team] Team ID from PS: ${pluralsightTeam.id}`);
+          //log(`[add-user-to-team] User ID from PS: ${pluralsightUser.id}`);
+          //log(`[add-user-to-team] Team ID from PS: ${pluralsightTeam.id}`);
 
           return addTeamMember(pluralsightUser.id, pluralsightTeam.id);
         });
