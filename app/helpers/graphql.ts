@@ -1,10 +1,10 @@
 import { Client, createClient } from "@urql/core";
 import {
   createTeam,
-  AddTeamManager,
+  addTeamManager,
   addTeamMember,
   getTeamInfo,
-  InviteManager,
+  inviteManager,
 } from "./pluralsight/teams";
 import { getUserByEmail } from "./pluralsight/users";
 import * as queries from "./queries";
@@ -41,29 +41,6 @@ export const getUsers = async () => {
     .toPromise()
     .then((result) => {
       console.log(JSON.stringify(result.data));
-    });
-};
-
-// Returns a bool indicating if a Team with the name passed as parameter exists
-export const teamExists = async (teamName: string) => {
-  var client: Client = initClient();
-  const query = queries.GET_TEAMS_BY_NAME;
-  const variables = { myTeamsFilter: { name: teamName } };
-
-  var teamExists = false;
-
-  // Execute GraphQL query and analyze results.
-  return await client
-    .query(query, variables)
-    .toPromise()
-    .then((result) => {
-      var nodes = result.data.teams.nodes;
-      teamExists = nodes.length == 1;
-
-      console.log(`[TeamExists] ${teamName} -> ${teamExists} ]`);
-
-      // console.log(nodes);
-      return teamExists;
     });
 };
 
@@ -116,28 +93,32 @@ export async function addManagerToTeam(
   teamName: string,
   inviteIfNotExists: boolean = false
 ) {
-  var managerInfo = await getUserByEmail(managerEmail);
-  var teamInfo = await getTeamInfo(teamName);
+  Promise.all([getUserByEmail(managerEmail), getTeamInfo(teamName)]).then(
+    ([managerInfo, teamInfo]) => {
+      // DEBUG
+      console.log(
+        `[AddManagerToTeam] Adding ${managerEmail} as manager of team "${teamName}"`
+      );
 
-  // DEBUG
-  console.log(
-    `[AddManagerToTeam] Adding ${managerEmail} as manager of team "${teamName}"`
-  );
-
-  // If the team exists
-  if (teamInfo) {
-    // If the manager exists
-    if (managerInfo) {
-      console.log(managerInfo);
-      console.log(teamInfo);
-      AddTeamManager(managerInfo.id, teamInfo.id);
-    } else {
-      if (inviteIfNotExists) {
-        // If the manager is new, invite them.
-        // InviteTeamManager()
-        console.log("Manager Info not found. New Manager :", managerEmail);
-        InviteManager(managerEmail, teamInfo.id);
+      // If the team does not exists... Exception or error?
+      if (!teamInfo) {
+        console.error("Team does not exist");
+        return;
       }
+
+      // If the manager exists
+      if (managerInfo) {
+        console.log(managerInfo);
+        console.log(teamInfo);
+        addTeamManager(managerInfo.id, teamInfo.id);
+      } /*else {
+        if (inviteIfNotExists) {
+          // If the manager is new, invite them.
+          // InviteTeamManager()
+          console.log("Manager Info not found. New Manager :", managerEmail);
+          InviteManager(managerEmail, teamInfo.id);
+        }
+      }*/
     }
-  }
+  );
 }

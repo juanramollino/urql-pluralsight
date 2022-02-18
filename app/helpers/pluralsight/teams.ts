@@ -1,7 +1,52 @@
 import { initClient } from "../graphql";
 import * as queries from "../queries";
 import * as mutations from "../mutations";
-import { TeamInfo } from "./TeamInfo";
+import { Client } from "@urql/core";
+// import { collectTypesFromResponse } from "@urql/core/dist/types/utils";
+
+/**
+ * Adds a Team Manager to the Team using the provided ID's.
+ * @param {string} userId String representing the User Id of the Manager (should exist)
+ * @param {string} teamId String representing the Team Id
+ */
+export async function addTeamManager(userId: string, teamId: string) {
+  var client: Client = initClient();
+  const mutation = mutations.ADD_TEAM_MANAGER;
+  const variables = {
+    myTeamManagerInput: {
+      teamId: teamId,
+      userId: userId,
+      permissionLevel: "LIMITED",
+    },
+  };
+
+  return client
+    .mutation(mutation, variables)
+    .toPromise()
+    .then((result) => {
+      if (result.error) {
+        // TODO: Improve all of this logic.
+        console.error(
+          "[Add Team Manager] An error occured when adding a manager to a team."
+        );
+        console.log(result.error);
+      } else {
+        // Do I want to save this payload? Who knows.
+        /*teamInfo = {
+          teamId: result.data.addTeamManager.teamId,
+          userId: result.data.addTeamManager.userId,
+          permissionLevel: result.data.addTeamManager.permissionLevel;
+        };*/
+        // console.debug("[Add Team Manager] Everything went fine.");
+      }
+    })
+    .catch((error) => {
+      console.error(
+        "[Add Team Manager] Something very bad occured when trying to add a member to a team"
+      );
+      console.log(error);
+    });
+}
 
 /**
  * Adds a new Team to Pluralsight by name
@@ -12,11 +57,11 @@ import { TeamInfo } from "./TeamInfo";
 export async function createTeam(
   name: string,
   desciption: string = ""
-): Promise<TeamInfo> {
-  var client = initClient();
+): Promise<AddTeamPayload> {
+  var client: Client = initClient();
   const mutation = mutations.ADD_TEAM;
   const variables = { myTeamInput: { name: name } };
-  var teamInfo: TeamInfo = { id: "", name: "" };
+  var addTeamPayload: AddTeamPayload = { id: "", name: "" };
 
   // DEBUG
   console.log(`[Create Team] Adding team ${name}`);
@@ -36,14 +81,12 @@ export async function createTeam(
         // TODO: Improve all of this logic.
         console.error(result.error);
       } else {
+        console.log(result.data);
         console.log(result.data.addTeam);
-        teamInfo = {
+        addTeamPayload = {
           id: result.data.addTeam.id,
           name: result.data.addTeam.name,
         };
-
-        // DEBUG
-        // console.log(teamInfo);
       }
     })
     .catch((error) => {
@@ -52,57 +95,7 @@ export async function createTeam(
       console.log(error);
     });
 
-  return teamInfo;
-}
-
-/**
- * Adds a Team Manager to the Team using the provided ID's.
- * @param {string} userId String representing the User Id of the Manager (should exist)
- * @param {string} teamId String representing the Team Id
- */
-export async function AddTeamManager(userId: string, teamId: string) {
-  var client = initClient();
-  const mutation = mutations.ADD_TEAM_MANAGER;
-  const variables = {
-    myTeamManagerInput: {
-      teamId: teamId,
-      userId: userId,
-      permissionLevel: "LIMITED",
-    },
-  };
-
-  // Execute GraphQL mutation to add the team
-  // Should check for existence? Maybe
-  await client
-    .mutation(mutation, variables)
-    .toPromise()
-    .then((result) => {
-      // DEBUG
-      console.log("Add Team Manager query executed!");
-      console.log(result);
-
-      if (result.error) {
-        // Most likely, the team already exists.
-        // TODO: Improve all of this logic.
-        console.log(result.error);
-        //teamInfo = null;
-      } else {
-        /*teamInfo = {
-                    "id" : result.data.addTeam.id ,
-                    "name" : result.data.addTeam.name
-                };*/
-
-        console.log(result.data);
-
-        // DEBUG
-        // console.log(teamInfo);
-      }
-    })
-    .catch((error) => {
-      // I don't think this works.
-      console.log("Error occured when trying to add a member to a team");
-      console.log(error);
-    });
+  return addTeamPayload;
 }
 
 /**
@@ -111,7 +104,7 @@ export async function AddTeamManager(userId: string, teamId: string) {
  * @param {string} teamId String representing the Pluralsight Team Id
  */
 export async function addTeamMember(userId: string, teamId: string) {
-  var client = initClient();
+  var client: Client = initClient();
   const mutation = mutations.ADD_TEAM_MEMBER;
   const variables = { myTeamMemberInput: { teamId: teamId, userId: userId } };
 
@@ -153,12 +146,12 @@ export async function addTeamMember(userId: string, teamId: string) {
  */
 export async function getTeamInfo(
   teamName: string
-): Promise<TeamInfo | undefined> {
-  var client = initClient();
+): Promise<AddTeamPayload | undefined> {
+  var client: Client = initClient();
   const query = queries.GET_TEAMS_BY_NAME;
   const variables = { myTeamsFilter: { name: teamName } };
 
-  var teamInfo: TeamInfo = { id: "", name: "" };
+  var teamInfo: AddTeamPayload = { id: "", name: "" };
 
   console.log(`[GetTeamInfo] Searching for team ${teamName}`);
 
@@ -167,7 +160,7 @@ export async function getTeamInfo(
     .query(query, variables)
     .toPromise()
     .then((result) => {
-      var nodes: TeamInfo[] = result.data.teams.nodes;
+      var nodes: AddTeamPayload[] = result.data.teams.nodes;
 
       // DEBUG to check result count.
       console.log(`[Get team info] Obtained ${nodes.length} Teams`);
@@ -197,10 +190,6 @@ export async function getTeamInfo(
       console.log(error);
       return undefined;
     });
-
-  // Return undefined if no team is found
-  // console.log("IMOUTAHERE");
-  //return undefined;
 }
 
 /**
@@ -208,8 +197,8 @@ export async function getTeamInfo(
  * @param managerEmail
  * @param teamId
  */
-export async function InviteManager(managerEmail: string, teamId: string) {
-  var client = initClient();
+export async function inviteManager(managerEmail: string, teamId: string) {
+  var client: Client = initClient();
   const mutation = mutations.INVITE_MANAGER;
   const variables = {
     myManagerInput: {
@@ -227,7 +216,6 @@ export async function InviteManager(managerEmail: string, teamId: string) {
     .toPromise()
     .then((result) => {
       // DEBUG
-      console.log("Invite Team Manager query executed!");
       console.log(result);
 
       if (result.error) {
@@ -253,3 +241,27 @@ export async function InviteManager(managerEmail: string, teamId: string) {
       console.log(error);
     });
 }
+
+// Returns a bool indicating if a Team with the name passed as parameter exists
+export const teamExists = async (teamName: string) => {
+  var client: Client = initClient();
+  const query = queries.GET_TEAMS_BY_NAME;
+  const variables = { myTeamsFilter: { name: teamName } };
+
+  var teamExists = false;
+
+  // Execute GraphQL query and analyze results.
+  return await client
+    .query(query, variables)
+    .toPromise()
+    .then((result) => {
+      var nodes = result.data.teams.nodes;
+      teamExists = nodes.length == 1;
+
+      // DEBUG
+      console.debug(`[team-exists] ${teamName} -> ${teamExists} ]`);
+
+      // console.log(nodes);
+      return teamExists;
+    });
+};

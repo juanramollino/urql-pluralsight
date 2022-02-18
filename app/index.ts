@@ -1,16 +1,26 @@
 // import fetch from "node-fetch" // Asco
+import { captureRejectionSymbol } from "events";
 import { lchmod, readFileSync } from "fs";
 import { stringify } from "querystring";
-import { addUserToTeam, addManagerToTeam, teamExists } from "./helpers/graphql";
-import { createTeam } from "./helpers/pluralsight/teams";
+import { addUserToTeam, addManagerToTeam } from "./helpers/graphql";
+import {
+  createTeam,
+  getTeamInfo,
+  teamExists,
+} from "./helpers/pluralsight/teams";
 
 //globalThis.fetch = fetch
 
-interface UserAndTeam {
+type SourceTeamInfo = {
   email: string;
   teamName: string;
   manager: string;
-}
+};
+
+type SourceTeamAndManager = {
+  name: string;
+  manager: string;
+};
 
 async function teamSync() {
   const inputFile: string = process.env.INPUT_FILE || "input/mini-test.json";
@@ -19,24 +29,58 @@ async function teamSync() {
   console.log(inputFile);
 
   let rawdata = readFileSync(inputFile);
-  let usersAndTeams = JSON.parse(rawdata.toString());
-  console.log(usersAndTeams);
+  let usersAndTeams: [SourceTeamInfo] = JSON.parse(rawdata.toString());
 
-  const teamInfo: Array<{ name: string; manager: string }> = [];
+  // Build a set just with Team Names (to create them)
   const justTeams: Set<string> = new Set(
-    usersAndTeams.map(
-      (x: { email: string; teamName: string; manager: string }) => x.teamName
-    )
+    usersAndTeams.map((x: SourceTeamInfo) => x.teamName)
+  );
+
+  // Build a set with Team Names + Managers
+  const teamsAndManagers: Set<SourceTeamAndManager> = new Set(
+    usersAndTeams.map((x: SourceTeamInfo) => {
+      let s: SourceTeamAndManager = {
+        manager: x.manager,
+        name: x.teamName,
+      };
+      return s;
+    })
   );
 
   // Create all Teams, if they don't exist.
-  justTeams.forEach((teamName: string) => {
+  createAllTeams(justTeams).then((_) => {
+    addAllTeamManagers(teamsAndManagers);
+    addAllTeamMembers(usersAndTeams);
+  });
+}
+
+async function createAllTeams(teamNames: Set<string>): Promise<void> {
+  console.log("[create-all-teams] Starting...");
+  teamNames.forEach((teamName: string) => {
     Promise.resolve(teamExists(teamName)).then((exists) => {
       if (!exists) createTeam(teamName);
     });
   });
+  console.log("[create-all-teams] Done.");
+}
 
-  /*
+function addAllTeamManagers(teamsAndManagers: Set<SourceTeamAndManager>) {
+  console.log("[add-team-managers] Starting... ");
+  teamsAndManagers.forEach((team: SourceTeamAndManager) => {
+    addManagerToTeam(team.manager, team.name);
+  });
+  console.log("[add-team-managers] Done.");
+}
+
+function addAllTeamMembers(usersAndTeams: [SourceTeamInfo]) {
+  console.log("[add-all-team-members] Starting...");
+}
+
+// And, hello.
+teamSync();
+
+/*
+
     const map = new Map();//lchmod;
 
     usersAndTeams.forEach(async (userAndTeam : { email : string, teamName : string , manager : string }) =>  {
@@ -57,7 +101,7 @@ async function teamSync() {
         }
     });*/
 
-  /*
+/*
     // For each Team, make sure the correct Manager is set up.
     teamInfo.forEach(async (team) => {
         // Debug
@@ -68,7 +112,3 @@ async function teamSync() {
 
     });
     */
-}
-
-// And, hello.
-teamSync();
