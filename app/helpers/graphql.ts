@@ -63,11 +63,14 @@ export const addUserToTeam = async (email: string, teamName: string) =>
       /*(console.log(
         `[add-user-to-team] Adding user ${email} to team "${teamName}"`
       );*/
-      console.log(`[add-user-to-team] User name : ${pluralsightUser.name}`);
-      console.log(`[add-user-to-team] Team name : ${pluralsightTeam?.name}`);
+
+      if (!pluralsightUser) throw `[add-user-to-team] User ${email} not found.`;
 
       if (!pluralsightTeam)
         throw "[add-user-to-team] Something went really wrong when checking/creating a team";
+
+      console.log(`[add-user-to-team] User name : ${pluralsightUser.name}`);
+      console.log(`[add-user-to-team] Team name : ${pluralsightTeam?.name}`);
 
       return Promise.resolve(pluralsightTeam)
         .then(log("lorem"))
