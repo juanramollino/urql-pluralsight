@@ -21,7 +21,7 @@ async function teamSync() {
     usersAndTeams.forEach(async (userAndTeam : { email : string, teamName : string , manager : string }) =>  {
 
         // Debug
-        console.log(`Adding ${userAndTeam.email} to team ${userAndTeam.teamName}...`);
+        console.log(`[Team Sync] Adding ${userAndTeam.email} to team ${userAndTeam.teamName}...`);
 
         // Add the user to the team
         addUserToTeam(userAndTeam.email, userAndTeam.teamName);
