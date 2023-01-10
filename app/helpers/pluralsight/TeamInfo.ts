@@ -1,8 +1,7 @@
-
 /**
- * TeamInfo interface
+ * Pluralsight Team Info type (for payloads)
  */
-export type TeamInfo = {
-    id: string ,
-    name: string
-}
+type AddTeamPayload = {
+  id: string;
+  name: string;
+};
